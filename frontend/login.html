@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 电商系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card {
+            width: 400px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 36px 40px 32px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 28px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 17px;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.25s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            font-weight: bold;
+            border-bottom-color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .required::before {
+            content: "*";
+            color: #f5222d;
+            margin-right: 4px;
+        }
+
+        .optional::after {
+            content: "（选填）";
+            color: #bbb;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 0 14px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.25s, transform 0.1s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            min-height: 22px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .message.error {
+            color: #f5222d;
+        }
+
+        .message.success {
+            color: #52c41a;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .welcome {
+            text-align: center;
+        }
+
+        .welcome .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-size: 30px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .welcome h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .welcome .info {
+            text-align: left;
+            background: #f7f8fa;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .welcome .info p {
+            font-size: 14px;
+            color: #666;
+            line-height: 2;
+        }
+
+        .welcome .info span {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="authCard">
+        <div class="logo">电商系统</div>
+        <div class="tabs">
+            <div class="tab active" data-tab="login" onclick="switchTab('login')">登录</div>
+            <div class="tab" data-tab="register" onclick="switchTab('register')">注册</div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="panel active" id="loginPanel">
+            <form onsubmit="return doLogin(event)">
+                <div class="form-group">
+                    <label class="required">用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="required">密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn" id="loginBtn">登 录</button>
+            </form>
+        </div>
+
+        <div class="panel" id="registerPanel">
+            <form onsubmit="return doRegister(event)">
+                <div class="form-group">
+                    <label class="required">用户名</label>
+                    <input type="text" id="regUsername" placeholder="必填，用于登录" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="required">密码</label>
+                    <input type="password" id="regPassword" placeholder="必填，登录密码" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="required">确认密码</label>
+                    <input type="password" id="regPassword2" placeholder="必填，再次输入密码" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="optional">手机号</label>
+                    <input type="text" id="regPhone" placeholder="选填，用于找回账号">
+                </div>
+                <div class="form-group">
+                    <label class="optional">用户类型</label>
+                    <select id="regUserType">
+                        <option value="">选填，默认普通用户</option>
+                        <option value="user">普通用户</option>
+                        <option value="merchant">商家</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" id="registerBtn">注 册</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card welcome" id="welcomeCard" style="display:none;">
+        <div class="avatar" id="avatar">U</div>
+        <h2>欢迎，<span id="welcomeName"></span></h2>
+        <div class="info">
+            <p>用户 ID：<span id="infoId"></span></p>
+            <p>用户名：<span id="infoUsername"></span></p>
+            <p>手机号：<span id="infoPhone"></span></p>
+            <p>用户类型：<span id="infoUserType"></span></p>
+            <p>注册时间：<span id="infoCreateTime"></span></p>
+        </div>
+        <button class="btn" onclick="logout()">退出登录</button>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8080";
+
+        function switchTab(tab) {
+            document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+            document.getElementById("loginPanel").classList.toggle("active", tab === "login");
+            document.getElementById("registerPanel").classList.toggle("active", tab === "register");
+            showMessage("");
+        }
+
+        function showMessage(text, type) {
+            const el = document.getElementById("message");
+            el.textContent = text;
+            el.className = "message" + (type ? " " + type : "");
+        }
+
+        async function request(url, data) {
+            const resp = await fetch(API_BASE + url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            return resp.json();
+        }
+
+        async function doLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById("loginUsername").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            if (!username || !password) {
+                showMessage("请输入用户名和密码", "error");
+                return false;
+            }
+            const btn = document.getElementById("loginBtn");
+            btn.disabled = true;
+            try {
+                const result = await request("/api/user/login", { username, password });
+                if (result.code === 200) {
+                    showMessage("登录成功", "success");
+                    localStorage.setItem("loginUser", JSON.stringify(result.data));
+                    setTimeout(() => showWelcome(result.data), 500);
+                } else {
+                    showMessage(result.msg || "登录失败", "error");
+                }
+            } catch (err) {
+                showMessage("网络错误，请确认后端已启动", "error");
+            } finally {
+                btn.disabled = false;
+            }
+            return false;
+        }
+
+        async function doRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById("regUsername").value.trim();
+            const password = document.getElementById("regPassword").value;
+            const password2 = document.getElementById("regPassword2").value;
+            const phone = document.getElementById("regPhone").value.trim();
+            const userType = document.getElementById("regUserType").value;
+
+            if (!username) {
+                showMessage("用户名是必填项", "error");
+                return false;
+            }
+            if (!password) {
+                showMessage("密码是必填项", "error");
+                return false;
+            }
+            if (password !== password2) {
+                showMessage("两次输入的密码不一致", "error");
+                return false;
+            }
+
+            const user = { username, password };
+            if (phone) user.phone = phone;
+            if (userType) user.userType = userType;
+
+            const btn = document.getElementById("registerBtn");
+            btn.disabled = true;
+            try {
+                const result = await request("/api/user", user);
+                if (result.code === 200) {
+                    showMessage("注册成功，请登录", "success");
+                    document.getElementById("loginUsername").value = username;
+                    document.getElementById("loginPassword").value = "";
+                    setTimeout(() => switchTab("login"), 800);
+                } else {
+                    showMessage(result.msg || "注册失败", "error");
+                }
+            } catch (err) {
+                showMessage("网络错误，请确认后端已启动", "error");
+            } finally {
+                btn.disabled = false;
+            }
+            return false;
+        }
+
+        function showWelcome(user) {
+            document.getElementById("authCard").style.display = "none";
+            document.getElementById("welcomeCard").style.display = "block";
+            document.getElementById("avatar").textContent = (user.username || "U").charAt(0).toUpperCase();
+            document.getElementById("welcomeName").textContent = user.username;
+            document.getElementById("infoId").textContent = user.id;
+            document.getElementById("infoUsername").textContent = user.username;
+            document.getElementById("infoPhone").textContent = user.phone || "未填写";
+            document.getElementById("infoUserType").textContent = user.userType === "merchant" ? "商家" : "普通用户";
+            document.getElementById("infoCreateTime").textContent = user.createTime || "-";
+        }
+
+        function logout() {
+            localStorage.removeItem("loginUser");
+            document.getElementById("welcomeCard").style.display = "none";
+            document.getElementById("authCard").style.display = "block";
+            document.getElementById("loginPassword").value = "";
+            showMessage("");
+            switchTab("login");
+        }
+
+        const saved = localStorage.getItem("loginUser");
+        if (saved) {
+            showWelcome(JSON.parse(saved));
+        }
+    </script>
+</body>
+</html>
